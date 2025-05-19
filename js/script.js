@@ -4,20 +4,21 @@ const global = {
 
 async function displayPopularMovies() {
   const { results } = await fetchAPIData("movie/popular");
-  
-  results.forEach(movie =>{
-    const div = document.createElement('div');
-    div.classList.add('card')
+
+  results.forEach((movie) => {
+    const div = document.createElement("div");
+    div.classList.add("card");
     div.innerHTML = `
     
           <a href="movie-details.html?id=${movie.id}">
             ${
-                movie.poster_path 
+              movie.poster_path
                 ? `<img
               src="https://image.tmdb.org/t/p/w500${movie.poster_path}"
               class="card-img-top"
               alt="Movie Title"
-            />` : `<img
+            />`
+                : `<img
               src="images/no-image.jpg"
               class="card-img-top"
               alt="Movie Title"
@@ -31,14 +32,15 @@ async function displayPopularMovies() {
             </p>
           </div>
 
-    `
-    document.querySelector('#popular-movies').appendChild(div)
-  })
+    `;
+    document.querySelector("#popular-movies").appendChild(div);
+  });
 }
 
 // Fetch data from TMDB API
 
 async function fetchAPIData(endpoint) {
+  spinnerControl();
   const API_KEY = "8e7d746f2a9457f54fce3af872443aea";
   const API_URL = " https://api.themoviedb.org/3/";
 
@@ -47,8 +49,18 @@ async function fetchAPIData(endpoint) {
   );
 
   const data = await response.json();
-
+  spinnerControl();
   return data;
+}
+
+// show spinner
+function spinnerControl() {
+  let spinner = document.querySelector(".spinner");
+  if (spinner.classList.contains("show")) {
+    spinner.classList.remove("show");
+  } else if (!spinner.classList.contains("show")) {
+    spinner.classList.add("show");
+  }
 }
 
 // highlight active link

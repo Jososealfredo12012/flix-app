@@ -258,11 +258,54 @@ async function search() {
   global.search.term = urlParams.get('search-term')
 
   if (global.search.term !== '' && global.search.term !== null) {
-    const results = await searchAPIData();
-    console.log(results);
+    const {results, total_pages, page} = await searchAPIData();
+
+    if (!results.length) {
+      showAlert('No results found')
+      return
+    }
+
+    displaySearchResults(results);
+    document.querySelector('#search-term').value = ''
+
   } else {
-    showAlert('Please enter a search term')
+    showAlert('Please enter a search term', 'error')
   }
+}
+
+function displaySearchResults(results) {
+
+  results.forEach((result) => {
+    const div = document.createElement("div");
+    div.classList.add("card");
+    div.innerHTML = `
+    
+          <a href="${global.search.type}-details.html?id=${result.id}">
+            ${
+              result.poster_path
+                ? `<img
+              src="https://image.tmdb.org/t/p/w500/${result.poster_path}"
+              class="card-img-top"
+              alt="${global.search.type === 'movie' ? result.title : result.name}"
+            />`
+                : `<img
+              src="images/no-image.jpg"
+              class="card-img-top"
+              alt="${global.search.type === 'movie' ? result.title : result.name}"
+            />`
+            }
+          </a>
+          <div class="card-body">
+            <h5 class="card-title">${global.search.type === 'movie' ? result.title : result.name}</h5>
+            <p class="card-text">
+              <small class="text-muted">Release: ${global.search.type === 'movie' ? result.release_date : result.first_air_date}</small>
+            </p>
+          </div>
+
+    `;
+    document.querySelector("#search-results").appendChild(div);
+  });
+  
 }
 
 function showAlert(message, className) {
@@ -331,7 +374,23 @@ async function fetchAPIData(endpoint) {
   const API_URL = global.api.apiUrl;
 
   const response = await fetch(
-    `${API_URL}${endpoint}?api_key=${API_KEY}&=en-US`
+    `${API_URL}${endpoint}?api_key=${API_KEY}&language=en-US`
+  );
+
+  const data = await response.json();
+  spinnerControl();
+  return data;
+}
+
+// Make request to search
+
+async function searchAPIData() {
+  spinnerControl();
+  const API_KEY = global.api.apiKey;
+  const API_URL = global.api.apiUrl;
+
+  const response = await fetch(
+    `${API_URL}search/${global.search.type}?api_key=${API_KEY}&language=en-US&query=${global.search.term}`
   );
 
   const data = await response.json();

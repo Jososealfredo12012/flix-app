@@ -1,5 +1,16 @@
 const global = {
   currentPage: window.location.pathname,
+  search: {
+    term: '',
+    type: '',
+    page: 1,
+    totalPages: 1
+  },
+  api: {
+    apiKey: '8e7d746f2a9457f54fce3af872443aea',
+    apiUrl: 'https://api.themoviedb.org/3/'
+
+  }
 };
 
 // Display 20 most popular movies
@@ -237,6 +248,34 @@ function displayBackgroundImage(type, backdroppath) {
   }
 }
 
+// Search Movies / Shows
+
+async function search() {
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString)
+
+  global.search.type = urlParams.get('type')
+  global.search.term = urlParams.get('search-term')
+
+  if (global.search.term !== '' && global.search.term !== null) {
+    const results = await searchAPIData();
+    console.log(results);
+  } else {
+    showAlert('Please enter a search term')
+  }
+}
+
+function showAlert(message, className) {
+  const alertEl = document.createElement('div')
+  alertEl.classList.add('alert', className)
+  alertEl.appendChild(document.createTextNode(message))
+  document.querySelector('#alert').appendChild(alertEl)
+
+setTimeout(() => {
+  alertEl.remove()
+}, 3000);
+}
+
 // Display slider movies
 
 async function displaySlider() {
@@ -288,8 +327,8 @@ function initSwipper() {
 
 async function fetchAPIData(endpoint) {
   spinnerControl();
-  const API_KEY = "8e7d746f2a9457f54fce3af872443aea";
-  const API_URL = " https://api.themoviedb.org/3/";
+  const API_KEY = global.api.apiKey;
+  const API_URL = global.api.apiUrl;
 
   const response = await fetch(
     `${API_URL}${endpoint}?api_key=${API_KEY}&=en-US`
@@ -343,7 +382,7 @@ function init() {
       displayShowDetails();
       break;
     case "/search.html":
-      console.log("Search");
+      search()
       break;
     default:
       break;
